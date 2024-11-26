@@ -50,8 +50,13 @@ services:
     depends_on:
       - redis
       - playwright-service
-    ports:
-      - "3002:3002"
+    expose:
+      - "3002"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.firecrawl-api.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.firecrawl-api.entrypoints=web,websecure
+      - traefik.http.services.firecrawl-api.loadbalancer.server.port=3002
     command: [ "pnpm", "run", "start:production" ]
 
   worker:
