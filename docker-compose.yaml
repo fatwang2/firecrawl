@@ -23,8 +23,12 @@ services:
   api:
     <<: *common-service
     environment:
-      REDIS_URL: ${REDIS_URL:-redis://:firecrawl123@redis:6379}
-      REDIS_RATE_LIMIT_URL: ${REDIS_RATE_LIMIT_URL:-redis://:firecrawl123@redis:6379}
+      REDIS_HOST: ${REDIS_HOST:-firecrawl-redis.firecrawl-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_USER: ${REDIS_USER:-default}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_URL: ${REDIS_URL:-redis://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}}
+      REDIS_RATE_LIMIT_URL: ${REDIS_RATE_LIMIT_URL:-redis://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}}
       PLAYWRIGHT_MICROSERVICE_URL: ${PLAYWRIGHT_MICROSERVICE_URL:-http://playwright-service:3000}
       USE_DB_AUTHENTICATION: ${USE_DB_AUTHENTICATION}
       PORT: ${PORT:-3002}
@@ -48,7 +52,6 @@ services:
       LOGGING_LEVEL: ${LOGGING_LEVEL}
       FLY_PROCESS_GROUP: app
     depends_on:
-      - redis
       - playwright-service
     expose:
       - "3002"
@@ -62,8 +65,12 @@ services:
   worker:
     <<: *common-service
     environment:
-      REDIS_URL: ${REDIS_URL:-redis://:firecrawl123@redis:6379}
-      REDIS_RATE_LIMIT_URL: ${REDIS_RATE_LIMIT_URL:-redis://:firecrawl123@redis:6379}
+      REDIS_HOST: ${REDIS_HOST:-firecrawl-redis.firecrawl-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_USER: ${REDIS_USER:-default}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_URL: ${REDIS_URL:-redis://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}}
+      REDIS_RATE_LIMIT_URL: ${REDIS_RATE_LIMIT_URL:-redis://${REDIS_USER}:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}}
       PLAYWRIGHT_MICROSERVICE_URL: ${PLAYWRIGHT_MICROSERVICE_URL:-http://playwright-service:3000}
       USE_DB_AUTHENTICATION: ${USE_DB_AUTHENTICATION}
       PORT: ${PORT:-3002}
@@ -87,16 +94,9 @@ services:
       LOGGING_LEVEL: ${LOGGING_LEVEL}
       FLY_PROCESS_GROUP: worker
     depends_on:
-      - redis
       - playwright-service
       - api
     command: [ "pnpm", "run", "workers" ]
-
-  redis:
-    image: redis:alpine
-    networks:
-      - dokploy-network
-    command: redis-server --requirepass firecrawl123
 
 networks:
   dokploy-network:
