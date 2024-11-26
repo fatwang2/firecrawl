@@ -94,7 +94,7 @@ services:
     networks:
       - backend
       - dokploy-network
-    command: redis-server --requirepass redis-password --bind 0.0.0.0
+    command: redis-server --bind 0.0.0.0
 
 networks:
   backend:
