@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+FROM gcr.io/google-containers/python:3.11-slim
+
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
