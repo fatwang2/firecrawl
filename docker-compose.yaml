@@ -64,6 +64,12 @@ services:
 
   worker:
     <<: *common-service
+    deploy:
+      replicas: 4  
+      resources:
+        limits:
+          cpus: '2'  
+          memory: 2G
     environment:
       REDIS_HOST: ${REDIS_HOST:-firecrawl-redis.firecrawl-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
