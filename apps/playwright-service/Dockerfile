@@ -1,4 +1,4 @@
-FROM asia.gcr.io/google-containers/python:3.11-slim
+FROM registry.cn-hangzhou.aliyuncs.com/library/python:3.11-slim
 
 
 ENV PYTHONUNBUFFERED=1
