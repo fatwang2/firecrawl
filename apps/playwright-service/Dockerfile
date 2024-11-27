@@ -1,4 +1,4 @@
-FROM gcr.io/google-containers/python:3.11-slim
+FROM asia.gcr.io/google-containers/python:3.11-slim
 
 
 ENV PYTHONUNBUFFERED=1
