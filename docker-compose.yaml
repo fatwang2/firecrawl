@@ -64,6 +64,7 @@ services:
 
   worker:
     <<: *common-service
+    restart: always
     deploy:
       replicas: 4  
       resources:
