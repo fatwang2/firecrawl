@@ -237,6 +237,28 @@ export interface MapResponse {
 }
 
 /**
+ * Parameters for extracting information from URLs.
+ * Defines options for extracting information from URLs.
+ */
+export interface ExtractParams<LLMSchema extends zt.ZodSchema = any> {
+  prompt: string;
+  schema?: LLMSchema;
+  systemPrompt?: string;
+  allowExternalLinks?: boolean;
+}
+
+/**
+ * Response interface for extracting information from URLs.
+ * Defines the structure of the response received after extracting information from URLs.
+ */
+export interface ExtractResponse<LLMSchema extends zt.ZodSchema = any> {
+  success: boolean;
+  data: LLMSchema;
+  error?: string;
+  warning?: string;
+}
+
+/**
  * Error response interface.
  * Defines the structure of the response received when an error occurs.
  */
@@ -244,7 +266,6 @@ export interface ErrorResponse {
   success: false;
   error: string;
 }
-
 
 /**
  * Custom error class for Firecrawl.
@@ -672,6 +693,55 @@ export default class FirecrawlApp {
         })
       } else {
         this.handleError(response, "check batch scrape status");
+      }
+    } catch (error: any) {
+      throw new FirecrawlError(error.message, 500);
+    }
+    return { success: false, error: "Internal server error." };
+  }
+
+  /**
+   * Extracts information from URLs using the Firecrawl API.
+   * Currently in Beta. Expect breaking changes on future minor versions.
+   * @param url - The URL to extract information from.
+   * @param params - Additional parameters for the extract request.
+   * @returns The response from the extract operation.
+   */
+  async extract<T extends zt.ZodSchema = any>(urls: string[], params?: ExtractParams<T>): Promise<ExtractResponse<zt.infer<T>> | ErrorResponse> {
+    const headers = this.prepareHeaders();
+
+    if (!params?.prompt) {
+      throw new FirecrawlError("Prompt is required", 400);
+    }
+
+    let jsonData: { urls: string[] } & ExtractParams<T> = { urls,  ...params };
+    let jsonSchema: any;
+    try {
+      jsonSchema = params?.schema ? zodToJsonSchema(params.schema) : undefined;
+    } catch (error: any) {
+      throw new FirecrawlError("Invalid schema. Use a valid Zod schema.", 400);
+    }
+
+    try {
+      const response: AxiosResponse = await this.postRequest(
+        this.apiUrl + `/v1/extract`,
+        { ...jsonData, schema: jsonSchema },
+        headers
+      );
+      if (response.status === 200) {
+        const responseData = response.data as ExtractResponse<T>;
+        if (responseData.success) {
+          return {
+            success: true,
+            data: responseData.data,
+            warning: responseData.warning,
+            error: responseData.error
+          };
+        } else {
+          throw new FirecrawlError(`Failed to scrape URL. Error: ${responseData.error}`, response.status);
+        }
+      } else {
+        this.handleError(response, "extract");
       }
     } catch (error: any) {
       throw new FirecrawlError(error.message, 500);
