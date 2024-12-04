@@ -10,6 +10,9 @@ export const redisConnection = new IORedis(process.env.REDIS_URL!, {
 
 export const scrapeQueueName = "{scrapeQueue}";
 
+const QUEUE_COMPLETE_AGE = Number(process.env.QUEUE_COMPLETE_AGE || 90000);  // 默认25小时
+const QUEUE_FAIL_AGE = Number(process.env.QUEUE_FAIL_AGE || 90000);         // 默认25小时
+
 export function getScrapeQueue() {
   if (!scrapeQueue) {
     scrapeQueue = new Queue(
@@ -18,24 +21,13 @@ export function getScrapeQueue() {
         connection: redisConnection,
         defaultJobOptions: {
           removeOnComplete: {
-            age: 90000, // 25 hours
+            age: QUEUE_COMPLETE_AGE,
           },
           removeOnFail: {
-            age: 90000, // 25 hours
+            age: QUEUE_FAIL_AGE,
           },
         },
       }
-      //   {
-      //   settings: {
-      //     lockDuration: 1 * 60 * 1000, // 1 minute in milliseconds,
-      //     lockRenewTime: 15 * 1000, // 15 seconds in milliseconds
-      //     stalledInterval: 30 * 1000,
-      //     maxStalledCount: 10,
-      //   },
-      //   defaultJobOptions:{
-      //     attempts: 5
-      //   }
-      // }
     );
     logger.info("Web scraper queue created");
   }

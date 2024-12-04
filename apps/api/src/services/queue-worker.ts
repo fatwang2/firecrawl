@@ -203,12 +203,15 @@ const workerFun = async (
   queue: Queue,
   processJobInternal: (token: string, job: Job) => Promise<any>
 ) => {
+  const WORKER_LOCK_DURATION = Number(process.env.WORKER_LOCK_DURATION || 60000);      // 1 minute
+  const WORKER_STALLED_INTERVAL = Number(process.env.WORKER_STALLED_INTERVAL || 30000); // 30 seconds
+  const WORKER_MAX_STALLED_COUNT = Number(process.env.WORKER_MAX_STALLED_COUNT || 10);  // 10 times
+
   const worker = new Worker(queue.name, null, {
     connection: redisConnection,
-    lockDuration: 1 * 60 * 1000, // 1 minute
-    // lockRenewTime: 15 * 1000, // 15 seconds
-    stalledInterval: 30 * 1000, // 30 seconds
-    maxStalledCount: 10, // 10 times
+    lockDuration: WORKER_LOCK_DURATION,
+    stalledInterval: WORKER_STALLED_INTERVAL,
+    maxStalledCount: WORKER_MAX_STALLED_COUNT,
   });
 
   worker.startStalledCheckTimer();
