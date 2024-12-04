@@ -155,7 +155,7 @@ export const scrapeOptions = z.object({
 export type ScrapeOptions = z.infer<typeof scrapeOptions>;
 
 export const extractV1Options = z.object({
-  urls: url.array(),
+  urls: url.array().max(10, "Maximum of 10 URLs allowed per request while in beta."),
   prompt: z.string().optional(),
   schema: z.any().optional(),
   limit: z.number().int().positive().finite().safe().optional(),
@@ -231,6 +231,7 @@ const crawlerOptions = z.object({
   allowBackwardLinks: z.boolean().default(false), // >> TODO: CHANGE THIS NAME???
   allowExternalLinks: z.boolean().default(false),
   allowSubdomains: z.boolean().default(false),
+  ignoreRobotsTxt: z.boolean().default(false),
   ignoreSitemap: z.boolean().default(true),
   deduplicateSimilarURLs: z.boolean().default(true),
   ignoreQueryParameters: z.boolean().default(false),
@@ -504,6 +505,7 @@ export function toLegacyCrawlerOptions(x: CrawlerOptions) {
     allowBackwardCrawling: x.allowBackwardLinks,
     allowExternalContentLinks: x.allowExternalLinks,
     allowSubdomains: x.allowSubdomains,
+    ignoreRobotsTxt: x.ignoreRobotsTxt,
     ignoreSitemap: x.ignoreSitemap,
     deduplicateSimilarURLs: x.deduplicateSimilarURLs,
     ignoreQueryParameters: x.ignoreQueryParameters,
@@ -520,6 +522,7 @@ export function fromLegacyCrawlerOptions(x: any): { crawlOptions: CrawlerOptions
       allowBackwardLinks: x.allowBackwardCrawling,
       allowExternalLinks: x.allowExternalContentLinks,
       allowSubdomains: x.allowSubdomains,
+      ignoreRobotsTxt: x.ignoreRobotsTxt,
       ignoreSitemap: x.ignoreSitemap,
       deduplicateSimilarURLs: x.deduplicateSimilarURLs,
       ignoreQueryParameters: x.ignoreQueryParameters,
