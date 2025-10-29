@@ -96,7 +96,7 @@ services:
     networks:
       - backend
     ports:
-      - "5432:5432"
+      - "5438:5432"
 
 networks:
   backend:
